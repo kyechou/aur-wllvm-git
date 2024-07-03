@@ -1,14 +1,14 @@
 # Maintainer: Kuan-Yen Chou <kuanyenchou at gmail dot com>
 
 pkgname=wllvm-git
-pkgver=r486.c663442
+pkgver=r497.cd87744
 pkgrel=1
 pkgdesc="A wrapper script to build whole-program LLVM bitcode files"
 arch=('any')
 url="https://github.com/travitch/whole-program-llvm"
 license=('MIT')
 depends=('python')
-makedepends=('git' 'python-setuptools')
+makedepends=('git' 'python-build' 'python-installer' 'python-wheel')
 provides=('wllvm')
 conflicts=('wllvm')
 source=("$pkgname"::'git+https://github.com/travitch/whole-program-llvm')
@@ -25,11 +25,15 @@ pkgver() {
 
 build() {
     cd "$srcdir/$pkgname"
-    python setup.py build
+    python -m build --wheel --no-isolation
 }
 
 package() {
     cd "$srcdir/$pkgname"
-    python setup.py install --prefix=/usr --root="$pkgdir" --optimize=1 --skip-build
+    python -m installer \
+        --prefix=/usr \
+        --destdir="$pkgdir" \
+        --compile-bytecode=1 \
+        dist/*.whl
     install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
